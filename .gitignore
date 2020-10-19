@@ -121,3 +121,10 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+# Miscellaneous
+*.json
+
+# Visual Studio Code
+.vscode/*
+*.code-workspace
