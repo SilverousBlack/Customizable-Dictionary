@@ -1,5 +1,5 @@
 """
-Quick-Insert-Export (QIE) Dictionary Data Engine Language Identity Entity Library
+Quick-Insert-Export (QIE) Dictionary Data Engine Language Identity Entry Library
 
 Copyright (c) 2020 Silverous Black
 
