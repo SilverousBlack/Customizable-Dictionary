@@ -94,3 +94,9 @@ def QuickSort(target, compfunc):
         return
     else:      
         ExchangePartitionSort(target, 0, sz, compfunc)
+
+common_comparator_fw = lambda left, right : left < right
+
+common_comparator_bw = lambda left, right : left > right
+
+common_comparator_eq = lambda left, right : left == right
