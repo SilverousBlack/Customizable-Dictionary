@@ -14,6 +14,11 @@ LanguageIdentityCollection (object)
 from QIE_Core import *
 from LanguageIdentityEntry import *
 
+class LanguageIdentityCollectionError(QIEErrorTag, Exception):
+    "Internal Error Exceptions raised by LanguageIdentityCollection\nLanguageIdentityCollectionError(buffer): creates a new exception based with buffer context"
+    def __init__(self, buffer):
+        self.__buffer__ = buffer.__class__(buffer)
+        
 class LanguageIdentityCollection(QIEContainerTag):
     __contents__: list
     __comparator__: callable
@@ -23,17 +28,18 @@ class LanguageIdentityCollection(QIEContainerTag):
             func(i, args)
         return
     
-    def __init__(self, other, comparator = common_comparator_fw):
+    def __init__(self, other = None, comparator = common_comparator_fw):
         self.__contents__ = list()
         self.__comparator__ = comparator
-        for i in other:
-            if not isinstance(i, LanguageIdentityEntry):
-                raise ValueError("Value is not an a qualified entry type")
-            elif i not in self.__contents__:
-                self.__contents__.append(LanguageIdentityEntry(i))
-                setattr(self.__contents__[len(self.__contents__) - 1], "__entries__", 0)
-            else: 
-                pass
+        if other != None:
+            for i in other:
+                if not isinstance(i, LanguageIdentityEntry):
+                    raise ValueError("Value is not an a qualified entry type")
+                elif i not in self.__contents__:
+                    self.__contents__.append(LanguageIdentityEntry(i))
+                    setattr(self.__contents__[len(self.__contents__) - 1], "__entries__", 0)
+                else: 
+                    pass
         QuickSort(self.__contents__, self.__comparator__)
             
     def __del__(self):
@@ -105,6 +111,11 @@ class LanguageIdentityCollection(QIEContainerTag):
     
     def __call__(self):
         QuickSort(self.__contents__, self.__comparator__)
+        internal = CleanSort(self.__contents__, self.__comparator__)
+        self.__contents__.clear()
+        for i in internal:
+            self.__contents__.append(i)
+        return self
     
     def get_comparator(self):
         return self.__comparator__
@@ -117,31 +128,23 @@ class LanguageIdentityCollection(QIEContainerTag):
         if not isinstance(value, LanguageIdentityEntry):
             raise TypeError("Value is an unsupported type")
         else:
-            loc = 0
-            for i in self.__contents__:
-                if not self.__comparator__(i, value):
-                    break
-                loc += 1
-            if loc ==  0:
-                self.__contents__ = [value] + self.__contents__
-            elif loc > len(self.__contents__:
-                self.__contents__ = self.__contents__ + [value]
-            else:
-                self.__contents__ = self.__contents__[0:loc] + [value] + [loc:(len(self.__contents__) - 1)]
+            InsertSort(self.__contents__, value, LanguageIdentityEntry, self.__comparator__)
         return self
         
-    def find(self, value, equalcomp = common_comparator_eq):
+    def find(self, value):
         if not isinstance(value, (str, LanguageIdentitiyEntry)):
             raise TypeError("Value is an unsupported type")
-        elif isinstance(value, str):
-            loc = 0
-            for i in self.__contents__:
-                if equalcomp(value, i.get_code()):
-                    return loc
-                loc += 1
-        elif isinstance(value, LanguageIdentityEntry):
-            loc = 0
-            for i in self.__contents__:
-                if equalcomp(value, i)):
-                    return loc
-                loc += 1
+        else:
+            return BinarySearch(self.__contents__, value, self.__comparator__)
+                
+    def entry(self, index, count = 1):
+        if not isinstance(index, (int, slice, str, LanguageIdentityEntry)):
+            raise TypeError("Index is an unsupported type")
+        if isinstance(index, int):
+            setattr(self.__contents__[index], "__entries__", count + getattr(self.__contents__[index], "__entries__"))
+        elif isinstance(index, slice):
+            for i in slice:
+                self.entry(i, count)
+        elif isinstance(index, (str, LanguageIdentityEntry)):
+            self.entry(self.find(index), count)
+        return self

@@ -19,6 +19,7 @@ QIEErrorTag (class)
 > a tag representing an object is an error-type member of the QIE Dictionary Data Engine family
 ----- ----- ----- ----- -----
 """
+from math import *
 
 class QIEObjectTag:
     def __repr__(self):
@@ -60,6 +61,10 @@ class QIEErrorTag(QIEObjectTag, Exception):
     def __issubobject__(objectname):
         return isinstance(objectname, QIEErrorTag)
     
+class SearchError(QIEErrorTag, Exception):
+    def __init__(self, buffer):
+        self.__buffer__ = buffer.__class__(buffer)
+    
 def _util_eps_partition(target, offset, size, compfunc):
     ioff = offset
     aoff = offset - 1
@@ -94,6 +99,37 @@ def QuickSort(target, compfunc):
         return
     else:      
         ExchangePartitionSort(target, 0, sz, compfunc)
+        
+def InsertSort(target, obj, cls, comp):
+    buffer = cls(obj)
+    anchor = cls(buffer)
+    for i in target:
+        if not comp(i, obj):
+            buffer = cls(i)
+            i = cls(anchor)
+            del anchor
+            anchor = cls(buffer)
+    target.append(cls(buffer))
+    
+def SortClean(target, sortcomp):
+    internal = [target[0]] if len(target) > 0 else list()
+    for i in target:
+        if i not in internal:
+            internal.append(i)
+    return internal
+
+def BinarySearch(target, value, comp):
+    li = 0
+    ri = len(target)
+    while li <= ri:
+        m = floor((li + ri) / 2)
+        if comp(target[m], value):
+            li = m + 1
+        elif not comp(target[m], value):
+            ri = m - 1
+        else:
+            return m
+    raise SearchError("Value is not in target")
 
 common_comparator_fw = lambda left, right : left < right
 

@@ -20,6 +20,10 @@ TranslationEntry (Object)
 from QIE_Core import *
 from LanguageIdentityEntry import *
 
+class TranslationEntry(QIEErrorTag, Exception):
+    def __init__(self, buffer):
+        self.__buffer__ = buffer.__class__(buffer)
+
 class TranslationEntry(QIEEntryTag):
     __lang_id__: LanguageIdentityEntry
     __trans_wrd__: str
@@ -42,6 +46,72 @@ class TranslationEntry(QIEEntryTag):
         
     def __repr__(self):
         return "%s : %s" % (self.__lang_id__.get_code(), self.__trans_wrd__)
+    
+    def __lt__(self, other):
+        if not isinstance(other, (str, TranslationEntry)):
+            raise TypeError("Value is not a supported type")
+        elif isinstance(other, str):
+            return self.__trans_wrd__ < other
+        else:
+            if self.__lang_id__ != other.get_lang_id():
+                raise TranslationEntry("Language Identity mismatch")
+            else:
+                return self.__trans_wrd__ < other.get_trans_wrd()
+            
+    def __gt__(self, other):
+        if not isinstance(other, (str, TranslationEntry)):
+            raise TypeError("Value is not a supported type")
+        elif isinstance(other, str):
+            return self.__trans_wrd__ > other
+        else:
+            if self.__lang_id__ != other.get_lang_id():
+                raise TranslationEntry("Language Identity mismatch")
+            else:
+                return self.__trans_wrd__ > other.get_trans_wrd()
+            
+    def __eq__(self, other):
+        if not isinstance(other, (str, TranslationEntry)):
+            raise TypeError("Value is not a supported type")
+        elif isinstance(other, str):
+            return self.__trans_wrd__ == other
+        else:
+            if self.__lang_id__ != other.get_lang_id():
+                raise TranslationEntry("Language Identity mismatch")
+            else:
+                return self.__trans_wrd__ == other.get_trans_wrd()
+            
+    def __ne__(self, other):
+        if not isinstance(other, (str, TranslationEntry)):
+            raise TypeError("Value is not a supported type")
+        elif isinstance(other, str):
+            return self.__trans_wrd__ != other
+        else:
+            if self.__lang_id__ != other.get_lang_id():
+                raise TranslationEntry("Language Identity mismatch")
+            else:
+                return self.__trans_wrd__ != other.get_trans_wrd()
+            
+    def __le__(self, other):
+        if not isinstance(other, (str, TranslationEntry)):
+            raise TypeError("Value is not a supported type")
+        elif isinstance(other, str):
+            return self.__trans_wrd__ <= other
+        else:
+            if self.__lang_id__ != other.get_lang_id():
+                raise TranslationEntry("Language Identity mismatch")
+            else:
+                return self.__trans_wrd__ <= other.get_trans_wrd()
+    
+    def __ge__(self, other):
+        if not isinstance(other, (str, TranslationEntry)):
+            raise TypeError("Value is not a supported type")
+        elif isinstance(other, str):
+            return self.__trans_wrd__ >= other
+        else:
+            if self.__lang_id__ != other.get_lang_id():
+                raise TranslationEntry("Language Identity mismatch")
+            else:
+                return self.__trans_wrd__ >= other.get_trans_wrd()
         
     def get_lang_id(self):
         return self.__lang_id__

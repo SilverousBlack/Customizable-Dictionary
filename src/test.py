@@ -7,7 +7,9 @@ from LanguageIdentityCollection import *
 i = LanguageIdentityEntry("English - Philippines", "en_ph")
 j = TranslationEntry(i, "giatay")
 k = TranslationDictionary([j])
-m = LanguageIdentityCollection([i])
+m = LanguageIdentityCollection()
+
+m.insert(i)
 
 del k[j]
 
