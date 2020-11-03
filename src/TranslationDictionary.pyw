@@ -40,7 +40,7 @@ class TranslationDictionary(QIEContainerTag):
     
     def __init__(self, other = None):
         self.__contents__ = dict()
-        if other == None:
+        if other is None:
             pass
         elif isinstance(other, TranslationDictionary):
             self.__contents__ = dict(other.__contents__)

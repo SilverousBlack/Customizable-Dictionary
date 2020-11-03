@@ -7,12 +7,31 @@ License: MIT
 
 ----- ----- ----- ----- -----
 LanguageIdentityCollection (object)
-> a collection of language identity entries, contains a number of language identity entries. Ordered and sortable.
+> a collection of language identity entries, contains a number of language identity entries. Ordered and sortable. Behaves similar to a link-array where items only appear once. 
+* contents (variable) - the internal contents of the collection
+* comparator (variable) - the internal active comparator of the collection for sorting and searching purposes
+* entry (function) - finds and adds to record number of 
+* find (function) - finds an entry and returns the index thereof
+* insert (function) - insersts a new entry into the collection
+* clear (function) - resets the contents of the collection
+* flush (function) - resets both contents and comparator
+* get_comparator (function) - returns the internal comparator
+* set_comparator (function) - alters the internal comparator 
 ----- ----- ----- ----- -----
 """
 
 from QIE_Core import *
 from LanguageIdentityEntry import *
+
+def __LICEntry__(value: LanguageIdentityEntry):
+    internal = LanguageIdentityEntry()
+    internal.set(value.get_name(), value.get_code())
+    try:
+        setattr(internal, "__entries__", getattr(value, "__entries__"))
+    except AttributeError:
+        setattr(internal, "__entries__", 0)
+    setattr(internal, "get_entries(self)", (lambda self : self.__entries__))
+    return internal
 
 class LanguageIdentityCollectionError(QIEErrorTag, Exception):
     "Internal Error Exceptions raised by LanguageIdentityCollection\nLanguageIdentityCollectionError(buffer): creates a new exception based with buffer context"
@@ -31,7 +50,7 @@ class LanguageIdentityCollection(QIEContainerTag):
     def __init__(self, other = None, comparator = common_comparator_fw):
         self.__contents__ = list()
         self.__comparator__ = comparator
-        if other != None:
+        if other is not None:
             for i in other:
                 if not isinstance(i, LanguageIdentityEntry):
                     raise ValueError("Value is not an a qualified entry type")
@@ -106,12 +125,11 @@ class LanguageIdentityCollection(QIEContainerTag):
             for i in self.__contents__:
                 if getattr(i, "__lang_code__") == index.get_code():
                     del i
-        QuickSort(self.__contents, self.__comparator__)
         return self
     
     def __call__(self):
         QuickSort(self.__contents__, self.__comparator__)
-        internal = CleanSort(self.__contents__, self.__comparator__)
+        internal = SortClean(self.__contents__, self.__comparator__)
         self.__contents__.clear()
         for i in internal:
             self.__contents__.append(i)
@@ -128,7 +146,7 @@ class LanguageIdentityCollection(QIEContainerTag):
         if not isinstance(value, LanguageIdentityEntry):
             raise TypeError("Value is an unsupported type")
         else:
-            InsertSort(self.__contents__, value, LanguageIdentityEntry, self.__comparator__)
+            InsertSort(self.__contents__, value, __LICEntry__, self.__comparator__)
         return self
         
     def find(self, value):
@@ -148,3 +166,32 @@ class LanguageIdentityCollection(QIEContainerTag):
         elif isinstance(index, (str, LanguageIdentityEntry)):
             self.entry(self.find(index), count)
         return self
+    
+    def clear(self):
+        del self.__contents__
+        self.__contents__ = []
+        return self
+        
+    def flush(self):
+        del self.__contents__, self.__comparator__
+        self.__contents__ = []
+        self.__comparator__ = None
+        return self
+    
+    def get(self, index):
+        return self[index]
+    
+    def pop(self, index):
+        internal = self[index]
+        del self[index]
+        return internal
+
+    def remove(self, index):
+        del self[index]
+        return self
+
+def entry_ranker_fw(left, right):
+    return left.get_entries() < right.get_entries()
+
+def entry_ranker_fw(left, right):
+    return left.get_entries() > right.get_entries()

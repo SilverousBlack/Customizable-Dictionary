@@ -29,7 +29,7 @@ class TranslationEntry(QIEEntryTag):
     __trans_wrd__: str
     
     def __init__(self, other = None, transwrd = None):
-        if other == None:
+        if other is None:
             self.__lang_id__ = LanguageIdentityEntry()
             self.__trans_wrd__ = str(None).lower()
         elif isinstance(other, TranslationEntry):

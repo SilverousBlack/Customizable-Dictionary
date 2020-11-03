@@ -9,6 +9,8 @@ j = TranslationEntry(i, "giatay")
 k = TranslationDictionary([j])
 m = LanguageIdentityCollection()
 
+m.set_comparator(entry_ranker_fw)
+
 m.insert(i)
 
 del k[j]

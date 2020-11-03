@@ -25,7 +25,7 @@ class LanguageIdentityEntry(QIEEntryTag):
     __lang_name__: str
     
     def __init__(self, other = None, langcode = None):
-        if other == None:
+        if other is None:
             self.__lang_name__ = "no_name"
             self.__lang_code__ = "no_code"
         elif isinstance(other, LanguageIdentityEntry):
