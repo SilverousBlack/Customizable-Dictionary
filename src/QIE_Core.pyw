@@ -113,9 +113,10 @@ def InsertSort(target, obj, cls, comp):
     
 def SortClean(target, sortcomp):
     internal = [target[0]] if len(target) > 0 else list()
-    for i in target:
-        if i not in internal:
-            internal.append(i)
+    if len(target) > 1:
+        for i in range(1, len(target)):
+            if sortcomp(internal[len(internal) - 1], target[i]):
+                internal.append(target[i])
     return internal
 
 def BinarySearch(target, value, comp):
