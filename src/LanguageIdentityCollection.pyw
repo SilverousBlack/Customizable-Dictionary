@@ -30,7 +30,7 @@ def __LICEntry__(value: LanguageIdentityEntry):
         setattr(internal, "__entries__", getattr(value, "__entries__"))
     except AttributeError:
         setattr(internal, "__entries__", 0)
-    setattr(internal, "get_entries(self)", (lambda self : self.__entries__))
+    internal.get_entries = MethodType((lambda self : self.__entries__), internal)
     return internal
 
 class LanguageIdentityCollectionError(QIEErrorTag, Exception):
@@ -40,7 +40,7 @@ class LanguageIdentityCollectionError(QIEErrorTag, Exception):
         
 class LanguageIdentityCollection(QIEContainerTag):
     __contents__: list
-    __comparator__: callable
+    __comparator__: MethodType
     
     def __apply__(self, func, *args):
         for i in self.__contents__:
@@ -55,8 +55,7 @@ class LanguageIdentityCollection(QIEContainerTag):
                 if not isinstance(i, LanguageIdentityEntry):
                     raise ValueError("Value is not an a qualified entry type")
                 elif i not in self.__contents__:
-                    self.__contents__.append(LanguageIdentityEntry(i))
-                    setattr(self.__contents__[len(self.__contents__) - 1], "__entries__", 0)
+                    self.__contents__.append(__LICEntry__(i))
                 else: 
                     pass
         QuickSort(self.__contents__, self.__comparator__)
@@ -97,18 +96,15 @@ class LanguageIdentityCollection(QIEContainerTag):
         if not isinstance(index, LanguageIdentityEntry):
             raise TypeError("Value is an unsupported type")
         if isinstance(index, int):
-            self.__contents__[index] = LanguageIdentityEntry(value)
-            setattr(self.__contents__[index], "__entries__", 0)
+            self.__contents__[index] = __LICEntry__(value)
         elif isinstance(index, str):
             for i in self.__contents__:
                 if getattr(i, "__lang_code__") == index:
-                    i = LanguageIdentityEntry(value)
-                    setattr(i, "__entries__", 0)
+                    i = __LICEntry__(value)
         elif isinstance(index, LanguageIdentityEntry):
             for i in self.__contents__:
                 if getattr(i, "__lang_code__") == index.get_code():
-                    i = LanguageIdentityEntry(value)
-                    setattr(i, "__entries__", 0)
+                    i = __LICEntry__(value)
         QuickSort(self.__contents, self.__comparator__)
         return self
     

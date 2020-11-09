@@ -20,6 +20,7 @@ QIEErrorTag (class)
 ----- ----- ----- ----- -----
 """
 from math import *
+from types import *
 
 class QIEObjectTag:
     def __repr__(self):
