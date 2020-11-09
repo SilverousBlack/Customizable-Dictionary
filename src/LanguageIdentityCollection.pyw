@@ -1,7 +1,7 @@
 """
 Quick-Insert-Export (QIE) Dictionary Data Engine Language Identity Collection Library
 
-Copyright (c) 2020 Silverous Black
+Copyright (c) 2020 Silverous Black, volantebjb
 
 License: MIT
 
