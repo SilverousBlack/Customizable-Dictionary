@@ -1,7 +1,7 @@
 """
 Quick-Insert-Export (QIE) Dictionary Data Engine Language Identity Collection Library
 
-Copyright (c) 2020 Silverous Black, volantebjb
+Copyright (c) 2020 SilverousBlack, volantebjb
 
 License: MIT
 
@@ -23,13 +23,13 @@ LanguageIdentityCollection (object)
 from QIE_Core import *
 from LanguageIdentityEntry import *
 
-def __LICEntry__(value: LanguageIdentityEntry):
+def LICEntry(value: LanguageIdentityEntry):
     internal = LanguageIdentityEntry()
     internal.set(value.get_name(), value.get_code())
     try:
         setattr(internal, "__entries__", getattr(value, "__entries__"))
     except AttributeError:
-        setattr(internal, "__entries__", 0)
+        setattr(internal, "__entries__", 1)
     internal.get_entries = MethodType((lambda self : self.__entries__), internal)
     return internal
 
@@ -55,7 +55,7 @@ class LanguageIdentityCollection(QIEContainerTag):
                 if not isinstance(i, LanguageIdentityEntry):
                     raise ValueError("Value is not an a qualified entry type")
                 elif i not in self.__contents__:
-                    self.__contents__.append(__LICEntry__(i))
+                    self.__contents__.append(LICEntry(i))
                 else: 
                     pass
         QuickSort(self.__contents__, self.__comparator__)
@@ -96,15 +96,15 @@ class LanguageIdentityCollection(QIEContainerTag):
         if not isinstance(index, LanguageIdentityEntry):
             raise TypeError("Value is an unsupported type")
         if isinstance(index, int):
-            self.__contents__[index] = __LICEntry__(value)
+            self.__contents__[index] = LICEntry(value)
         elif isinstance(index, str):
             for i in self.__contents__:
                 if getattr(i, "__lang_code__") == index:
-                    i = __LICEntry__(value)
+                    i = LICEntry(value)
         elif isinstance(index, LanguageIdentityEntry):
             for i in self.__contents__:
                 if getattr(i, "__lang_code__") == index.get_code():
-                    i = __LICEntry__(value)
+                    i = LICEntry(value)
         QuickSort(self.__contents, self.__comparator__)
         return self
     
@@ -142,7 +142,7 @@ class LanguageIdentityCollection(QIEContainerTag):
         if not isinstance(value, LanguageIdentityEntry):
             raise TypeError("Value is an unsupported type")
         else:
-            InsertSort(self.__contents__, value, __LICEntry__, self.__comparator__)
+            InsertSort(self.__contents__, value, LICEntry, self.__comparator__)
         return self
         
     def find(self, value):

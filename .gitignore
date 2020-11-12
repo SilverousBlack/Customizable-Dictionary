@@ -128,3 +128,7 @@ dmypy.json
 # Visual Studio Code
 .vscode/*
 *.code-workspace
+
+# Run Throughs
+*.ddf
+*.ddft

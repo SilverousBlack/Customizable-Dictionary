@@ -1,7 +1,7 @@
 """
 Quick-Insert-Export (QIE) Dictionary Data Engine Dictionary Entry Library
 
-Copyright (c) 2020 Silverous Black, volantebjb
+Copyright (c) 2020 SilverousBlack, volantebjb
 
 License: MIT
 

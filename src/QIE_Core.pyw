@@ -1,7 +1,7 @@
 """
 Quick-Insert-Export (QIE) Dictionary Data Engine Core Library
 
-Copyright (c) 2020 Silverous Black, volantebjb
+Copyright (c) 2020 SilverousBlack, volantebjb
 
 License: MIT
 
@@ -20,6 +20,8 @@ QIEErrorTag (class)
 ----- ----- ----- ----- -----
 """
 from math import *
+from os import *
+from shutil import *
 from types import *
 
 class QIEObjectTag:

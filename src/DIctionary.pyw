@@ -1,7 +1,7 @@
 """
 Quick-Insert-Export (QIE) Dictionary Data Engine Dictionary Library
 
-Copyright (c) 2020 Silverous Black, volantebjb
+Copyright (c) 2020 SilverousBlack, volantebjb
 
 License: MIT
 
@@ -26,7 +26,7 @@ class Dictionary(QIEContainerTag):
     __langs__: LanguageIdentityCollection
     __comp__: MethodType
     
-    def __init__(self, other = None, langs = None, comp = None):
+    def __init__(self, other = None, langs = None, comp = dict_wrd_comp_fw):
         if other is not None and isinstance(other, Dictionary):
             self.__contents__ = list(other.__contents__)
             self.__langs__ = LanguageIdentityCollection(other.__langs__)
@@ -86,5 +86,58 @@ class Dictionary(QIEContainerTag):
         self.__langs__ = LanguageIdentityCollection()
         return self
     
+    def insert(self, entry: DictionaryEntry):
+        InsertSort(self.__contents__, entry, DictionaryEntry, self.__comp__)
+        try:
+            ind = self.__langs__.find(entry.get_lang())
+            self.__langs__.entry(ind)
+        except:
+            self.__langs__.insert(entry.get_lang())
+        return self
     
+    def overwrite(self, entry: DictionaryEntry):
+        try:
+            ind = BinarySearch(self.__contents__, entry, self.__comp__)
+            inx = self.__langs__.find(self.__contents__[ind].get_lang())
+            self.__langs__.entry(inx, -1)
+            self.__contents__[ind] = DictionaryEntry(entry)
+            try:
+                ine = self.__langs__.find(entry.get_lang())
+                self.__langs__.entries(ine, 1)
+            except:
+                self.__langs__.insert(entry.get_lang())
+        except:
+            raise DictionaryError("Entry not found in dictionary, cannot overwrite")
+        
+    def find(self, entry: DictionaryEntry):
+        try:
+            return BinarySearch(self.__contents__, entry, self.__comp__)
+        except:
+            raise DictionaryError("Entry not found in dictionary")
+        
+    def filter(self, filter, *filterargs):
+        internal = []
+        for i in self.__contents__:
+            if filter(i, filterargs):
+                internal.appen(i)
+        return internal
+    
+    def remove(self, index):
+        setattr(self.__langs__[self.__contents__[index].get_lang()], "__entries__", self.__langs__[self.__contents__[index].get_lang()].get_entries() - 1)
+        del self.__contents__[index]
+        return self
+    
+    def pop(self, index):
+        temp = self.__contents__[index]
+        self.remove(index)
+        return temp
+    
+def filtertolang(value: DictionaryEntry, lang: LanguageIdentityEntry):
+    return value.get_lang() == lang
+
+def filtertowordlen(value: DictionaryEntry, wrdlen: int):
+    return len(value.get_wrd()) == wrdlen
+
+def filtertowordcontent(value: DictionaryEntry, wrd: str):
+    return wrd in value.get_wrd()
     
