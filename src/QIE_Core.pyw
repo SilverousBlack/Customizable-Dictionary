@@ -19,6 +19,7 @@ QIEErrorTag (class)
 > a tag representing an object is an error-type member of the QIE Dictionary Data Engine family
 ----- ----- ----- ----- -----
 """
+import io
 from math import *
 from os import *
 from shutil import *

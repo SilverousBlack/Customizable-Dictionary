@@ -19,7 +19,7 @@ def create_file_name(fname: str):
     return fname if fname[-5:-1] != ".ddf" else str(fname + ".ddf")
 
 def u_export(chunk: Dictionary, fname: str):
-    file = open(fname, mode="w+", encoding="utf-8")
+    file = io.open(fname, mode="w+", encoding="utf-8")
     contents = getattr(chunk, "__contents__")
     langs = getattr(getattr(chunk, __langs__), "__contents__")
     file.write("Dictionary\n")
@@ -52,7 +52,7 @@ def safe_export(chunk: Dictionary, fname: str):
         raise QIEError
     
 def u_import(fname: str):
-    file = open(fname, mode="r", encoding="utf-8")
+    file = io.open(fname, mode="r", encoding="utf-8")
     internal = []
     langs = []
     if file.readline() != "Dictionary\n":
