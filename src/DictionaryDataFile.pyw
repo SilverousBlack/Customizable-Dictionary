@@ -19,9 +19,11 @@ def create_file_name(fname: str):
     return fname if fname[-5:-1] != ".ddf" else str(fname + ".ddf")
 
 def u_export(chunk: Dictionary, fname: str):
-    file = io.open(fname, mode="w+", encoding="utf-8")
+    file = io.open(fname, "w")
+    file.close()
+    file = io.open(fname, "w+", encoding="utf-8")
     contents = getattr(chunk, "__contents__")
-    langs = getattr(getattr(chunk, __langs__), "__contents__")
+    langs = getattr(getattr(chunk, "__langs__"), "__contents__")
     file.write("Dictionary\n")
     file.write("Contents\n")
     for i in contents:
@@ -60,37 +62,41 @@ def u_import(fname: str):
     if file.readline() != "Contents\n":
         raise QIEError
     while True:
-        if file.readline() == "Entry\n":
-            temp_wrd = str(file.readline())[:-2]
+        buffer = file.readline()
+        if buffer == "Entry\n":
+            temp_wrd = str(file.readline())[:-1]
             temp_trans = TranslationDictionary()
             if file.readline() == "{\n":
                 while true:
-                    trans_temp = TranslationEntry()
-                    temp_chunk = str(file.readline()).split("\t")
-                    temp_name = str(temp_chunk[0])
-                    temp_code = str(temp_chunk[1])
-                    temp_val = str(temp_chunk[2])[:-2]
-                    trans_temp.set_trans_wrd(temp_val)
-                    trans_temp.set_lang_id(LanguageIdentityEntry(temp_name, temp_code))
-                    temp_trans.add(trans_temp)
-                    if file.readline() == "}\n":
+                    langbuffer = str(file.readline()).split("\t")
+                    if langbuffer == "}\n":
                         break
+                    else:
+                        trans_temp = TranslationEntry()
+                        temp_chunk = langbuffer
+                        temp_name = str(temp_chunk[0])
+                        temp_code = str(temp_chunk[1])
+                        temp_val = str(temp_chunk[2])[:-1]
+                        trans_temp.set_trans_wrd(temp_val)
+                        trans_temp.set_lang_id(LanguageIdentityEntry(temp_name, temp_code))
+                        temp_trans.add(trans_temp)
             temp_chunk = str(file.readline()).split("\t")
-            temp_lang = LanguageIdentityEntry(str(temp_chunk[0]), str(temp_chunk[1])[:-2])
+            temp_lang = LanguageIdentityEntry(str(temp_chunk[0]), str(temp_chunk[1])[:-1])
             chunk = DictionaryEntry(temp_wrd, temp_trans, temp_lang)
             internal.append(chunk)
-        elif file.readline() == "Languages\n":
+        elif buffer == "Languages\n":
             break
     while True:
-        if file.readline() == "Entry\n":
+        buffer = file.readline()
+        if buffer == "Entry\n":
             temp_buffer = str(file.readline()).split("\t")
             temp_entry = int(temp_buffer[0])
             temp_name = str(temp_chunk[1])
-            temp_code = str(temp_chunk[2])[:-2]
+            temp_code = str(temp_chunk[2])[:-1]
             temp_lang = LICEntry(LanguageIdentityEntry(temp_name, temp_code))
             setattr(temp_lang, "__entries__", temp_entry)
             langs.append(temp_lang)
-        elif file.readline() == "end\n":
+        elif buffer == "end\n":
             break
     buffer_langs = LanguageIdentityCollection(langs)
     return Dictionary(internal, buffer_langs)
