@@ -19,12 +19,14 @@ target = Dictionary()
 active = Dictionary()
 
 def copyright():
+    cls()
     SilverousBlack = "J C Segundo"
     volantebjb = "B J Volante"
-    return str("Copyright (c) 2020 " + SilverousBlack + " " + volantebjb)
+    print(str("Copyright (c) 2020 " + SilverousBlack + " " + volantebjb))
 
 def license():
-    return """MIT License
+    cls()
+    licencse = """MIT License
 
 Copyright (c) 2020 SilverousBlack, volantebjb
 
@@ -46,6 +48,7 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
+    print(license)
 
 def create_sys():
     try:
@@ -157,6 +160,7 @@ def main(args = None):
     del file
     while True:
         reply = menu()
+        if reply not in ["a", "o", "v", "f", "s", "l", "x", "c", "e"]
         if reply == "a":
             wizard_add()
         elif reply == "o":
