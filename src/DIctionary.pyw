@@ -46,6 +46,9 @@ class Dictionary(QIEContainerTag):
         del self.__contents__, self.__langs__, self.__comp__
         del self
         
+    def __len__(self):
+        return len(self.__contents__)
+        
     def __repr__(self):
         return "Dictionary [%s]" % (len(self.__contents__))
     

@@ -16,11 +16,9 @@ from DictionaryEntry import *
 from Dictionary import *
 
 def create_file_name(fname: str):
-    return fname if fname[-5:-1] != ".ddf" else str(fname + ".ddf")
+    return fname if fname[-4:] == ".ddf" else str(fname + ".ddf")
 
 def u_export(chunk: Dictionary, fname: str):
-    file = io.open(fname, "w")
-    file.close()
     file = io.open(fname, "w+", encoding="utf-8")
     contents = getattr(chunk, "__contents__")
     langs = getattr(getattr(chunk, "__langs__"), "__contents__")
@@ -30,7 +28,7 @@ def u_export(chunk: Dictionary, fname: str):
         file.write("Entry\n")
         file.write(i.get_wrd() + "\n")
         file.write("{\n")
-        for val in i.get_trans_dict().items():
+        for val in i.get_trans_dict().values():
             file.write("Translations\n")
             file.write(val.get_lang_id().get_name() + "\t")
             file.write(val.get_lang_id().get_code() + "\t")
@@ -48,17 +46,14 @@ def u_export(chunk: Dictionary, fname: str):
     file.close()
     
 def safe_export(chunk: Dictionary, fname: str):
-    try:
-        u_export(chunk, create_file_name(fname))
-    except:
-        raise QIEError
+    u_export(chunk, create_file_name(fname))
     
 def u_import(fname: str):
     file = io.open(fname, mode="r", encoding="utf-8")
     internal = []
     langs = []
     if file.readline() != "Dictionary\n":
-        raise QIEError
+        raise QIEErrorTag
     if file.readline() != "Contents\n":
         raise QIEError
     while True:

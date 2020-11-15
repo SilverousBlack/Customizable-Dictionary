@@ -11,6 +11,8 @@ License: MIT
 """
 import sys
 from time import sleep
+from time import perf_counter
+from threading import Thread
 from QIEDDE import *
 
 bar_part = "="
@@ -83,7 +85,7 @@ def get_filename(fname: str):
 def load(fname: str):
     global target, loaded, bar, bar_part
     del loaded
-    loaded = get_filename(fname)
+    loaded = create_file_name(get_filename(fname))
     local = getcwd() + "/.cdqie/active/active.ddf"
     copy2(fname, getcwd() + loaded)
     copy2(fname, local)
@@ -92,7 +94,10 @@ def load(fname: str):
 def package_export(src: str, dest: str):
     global target, loaded, bar, bar_part
     safe_export(target, src)
-    copy2(src, dest)
+    try:
+        copy2(src, dest)
+    except SameFileError:
+        pass
 
 def cls():
     system("cls")
@@ -105,14 +110,13 @@ def menu():
     m1 = "Commands:"
     m2 = "    > [A] Add Entry"
     m3 = "    > [O] Overwrite Entry"
-    m4 = "    > [V] View Entries"
-    m5 = "    > [F] Filter Entries"
-    m6 = "    > [S] Search Entry"
-    m7 = "    > [L] Load Another Dictionary (automatic export)"
-    m8 = "    > [X] Export Dictionary"
-    m9 = "    > [C] Clean Active System Directory"
+    m4 = "    > [R] Remove Entry"
+    m5 = "    > [V] View Entries [%s]" % len(target)
+    m6 = "    > [L] Load Another Dictionary (automatic export)"
+    m7 = "    > [X] Export Dictionary"
+    m8 = "    > [C] Clean Active System Directory"
     e = "    > [E] Exit"
-    log = [[h1], [h2], [m1], [m2], [m3], [m4], [m5], [m6], [m7], [m8], [m9], [e]]
+    log = [[h1], [h2], [m1], [m2], [m3], [m4], [m5], [m6], [m7], [m8], [e]]
     QuickSort(log, (lambda a, b : len(a[0]) < len(b[0])))
     long = len(log[-1][0])
     print(bar_part * long)
@@ -128,7 +132,6 @@ def menu():
     print(m6)
     print(m7)
     print(m8)
-    print(m9)
     print(e)
     reply = str(input(">> ")).lower()
     print(bar_part * long)
@@ -206,34 +209,322 @@ def wizard_add():
             continue
 
 def wizard_overwrite():
-    pass
+    global target, bar, bar_part
+    if len(target) == 0:
+        print("There are no dictionary contents to be removed.")
+        print(bar)
+        sleep(2.5)
+        return
+    while True:
+        cls()
+        print(bar)
+        print("Overwrite Entry Wizard")
+        print(bar)
+        sleep(0.5)
+        wrd = input("Enter the dictionary word entry: ")
+        print(bar)
+        lname = input("Enter entry language name: ").lower()
+        lcode = input("Enter entry language code: ").upper()
+        print(bar)
+        temptrans = TranslationDictionary()
+        while True:
+            cls()
+            print(bar)
+            print("Translation Entry Mode:\nEnter a slash (\"/\") to exit mode.")
+            print(bar)
+            trans = input("Enter translation entry: ")
+            print(bar)
+            if trans == "/":
+                break
+            tname = input("Enter translation language name: ").lower()
+            tcode = input("Enter translation language code: ").upper()
+            print(bar)
+            print("Translation details: ")
+            print("%s [%s : %s]" % (trans, tname, tcode))
+            halt = input("Enter [c] to add entry, otherwise reset fields: ").lower()
+            print(bar)
+            if halt == "c":
+                temptrans.add(TranslationEntry(LanguageIdentityEntry(tname, tcode), trans))
+                print("Entry added.")
+                print(bar)
+                sleep(0.5)
+                continue
+            else:
+                print("Entry not added.")
+                print(bar)
+                sleep(0.5)
+                continue
+        cls()
+        print(bar)
+        print("Overwrite Entry Wizard")
+        print(bar)
+        print("Entry Details:")
+        print("Word Entry: " + wrd)
+        print("Word Language: %s [%s]" % (lname, lcode))
+        print("Translations:")
+        for i in temptrans.values():
+            print("> %s " % i)
+        print(bar)
+        reply = input("Input:\n    [c] to overwrite entry and exit wizard,\n    [e] to exit wizard without overwrite,\n    otherwise reset fields\n> ").lower()
+        print(bar)
+        if reply == "c":
+            target.insert(DictionaryEntry(wrd, temptrans, LanguageIdentityEntry(lname, lcode)))
+            print("Entry overwritter.")
+            print(bar)
+            sleep(0.5)
+            break
+        elif reply == "e":
+            print("Entry not overwritten.")
+            print(bar)
+            sleep(0.5)
+            break
+        else:
+            continue
+
+def wizard_remove():
+    global target, bar, bar_part
+    if len(target) == 0:
+        print("There are no dictionary contents to be removed.")
+        print(bar)
+        sleep(2.5)
+        return
+    while True:
+        cls()
+        print(bar)
+        print("Remove Entry Wizard")
+        print(bar)
+        index: int
+        while True:
+            try:
+                index = int(input("Input entry index to be removed: "))
+                break
+            except ValueError:
+                print("Value is not a qualified integer to be an index.")
+                print(bar)
+                continue
+        buffer: DictionaryEntry
+        try:
+            buffer = DictionaryEntry(target[index])
+        except IndexError:
+            print("Index beyond the size of dictionary.")
+            sleep(0.5)
+            continue
+        cls()
+        print(bar)
+        print("Remove Entry Wizard")
+        print(bar)
+        print("Entry Details:")
+        print("Word Entry: " + buffer.get_wrd())
+        print("Word Language: %s [%s]" % (buffer.get_lang().get_name(), buffer.get_lang().get_code()))
+        print("Translations:")
+        for i in buffer.get_trans_dict().values():
+            print("> %s " % i)
+        print(bar)
+        reply = input("Input:\n    [c] to remove entry and exit wizard,\n    [e] to exit wizard without remove,\n    otherwise reset fields\n> ").lower()
+        if reply == "c":
+            target.remove(index)
+            print("Entry removed.")
+            print(bar)
+            sleep(0.5)
+            break
+        elif reply == "e":
+            print("Entry not removed.")
+            print(bar)
+            sleep(0.5)
+            break
+        else:
+            continue
 
 def wizard_view():
-    pass
-
-def wizard_filter():
-    pass
-
-def wizard_search():
-    pass
+    global target, bar, bar_part
+    if len(target) == 0:
+        print("There are no dictionary contents to be viewed.")
+        print(bar)
+        sleep(2.5)
+        return
+    while True:
+        cls()
+        print(bar)
+        print("View Entries Wizard")
+        print(bar)
+        for i in range(len(target)):
+            print("%s > %s [%s]" % (i, target[i].get_wrd(), target[i].get_lang().get_code()))
+        print(bar)
+        reply = input("Input:\n    [s] to select an entry for viewing,\n    [e] to exit wizard, otherwise refresh.\n> ").lower()
+        print(bar)
+        sleep(0.5)
+        if reply == "s":
+            index: int
+            while True:
+                try:
+                    index = int(input("Input entry index to be viewed: "))
+                    break
+                except ValueError:
+                    print("Value is not a qualified integer to be an index.")
+                    print(bar)
+                    continue
+            buffer: DictionaryEntry
+            try:
+                buffer = DictionaryEntry(target[index])
+            except IndexError:
+                print("Index beyond the size of dictionary.")
+                sleep(0.5)
+                continue
+            cls()
+            print(bar)
+            print("View Entry Wizard")
+            print(bar)
+            print("Entry Details:")
+            print("Word Entry: " + buffer.get_wrd())
+            print("Word Language: %s [%s]" % (buffer.get_lang().get_name(), buffer.get_lang().get_code()))
+            print("Translations:")
+            for i in buffer.get_trans_dict().values():
+                print("> %s " % i)
+            print(bar)
+            input("Press [Enter] to continue.")
+            print(bar)
+            sleep(0.5)
+            continue
+        elif reply == "e":
+            break
+        else:
+            continue
 
 def wizard_load():
-    pass
+    global target, loaded, bar, bar_part
+    file = io.open(".cdqie/sys.dat", "r", encoding="utf-8")
+    actual = file.readline()[:-1]
+    local = file.readline()[:-1]
+    file.close()
+    del file
+    cls()
+    print(bar)
+    print("Dictionary Load Wizard")
+    print(bar)
+    beginex = perf_counter()
+    print("Exporting current active dictionary...")
+    thr = Thread(target=package_export, args=(local, actual))
+    thr.start()
+    while thr.is_alive():
+        cur = perf_counter()
+        print("Exporting in progress: {:.2f} seconds elapsed".format(cur - beginex), end="\r")
+        sleep(0.001)
+    thr.join()
+    endex = perf_counter()
+    print("Exporting finished: {:.2f} seconds".format(endex - beginex))
+    print(bar)
+    sleep(1.5)
+    while True:
+        cls()
+        print(bar)
+        print("Dictionary Load Wizard")
+        print(bar)
+        loc = create_file_name(input("Input Dictionary Target Location: "))
+        local = ".cdqie/active/" + create_file_name(get_filename(loc))
+        print(bar)
+        beginim = perf_counter()
+        print("Importing file...")
+        try:
+            load(loc)
+        except FileNotFoundError:
+            print("File not found.")
+            input("Press [Enter] to try again.")
+            continue
+        except QIEErrorTag:
+            print("Dictionary file might be broken or internal error occured.")
+            break
+        endim = perf_counter()
+        file = io.open(".cdqie/sys.dat", "w+", encoding="utf-8")
+        file.write(loc + "\n")
+        file.write(local + "\n")
+        file.close()
+        print("Importing finished: {:.2f} seconds".format(endim - beginim))
+        print(bar)
+        input("Press [Enter] to continue.")
+        print(bar)
+        sleep(0.5)
+        break
 
 def wizard_export():
-    pass
+    global target, loaded, bar, bar_part
+    file = io.open(".cdqie/sys.dat", "r", encoding="utf-8")
+    actual = file.readline()[:-1]
+    local = file.readline()[:-1]
+    file.close()
+    del file
+    cls()
+    print(bar)
+    print("Dictionary Export Wizard")
+    print(bar)
+    beginex = perf_counter()
+    print("Exporting current active dictionary...")
+    thr = Thread(target=package_export, args=(local, actual))
+    thr.start()
+    while thr.is_alive():
+        cur = perf_counter()
+        print("Exporting in progress: {:.2f} seconds elapsed".format(cur - beginex), end="\r")
+        sleep(0.001)
+    thr.join()
+    endex = perf_counter()
+    print("Exporting finished: {:.2f} seconds".format(endex - beginex))
+    print(bar)
+    input("Press [Enter] to continue.")
+    sleep(0.5)
+
+def clean_system():
+    remove(".cdqie/active/active.ddf")
+    remove(".cdqie/active/active.ddft")
+    remove(".cdqie/active/DefaultDictionary.ddf")
+    safe_export(Dictionary(), ".cdqie/active/DefaultDictionary.ddf")
 
 def wizard_clean():
-    pass
+    global target, loaded, bar, bar_part
+    while True:
+        cls()
+        print(bar)
+        print("System Clean Wizard")
+        print(bar)
+        print("NOTICE:\nCleaning system might result to loss of data.")
+        print(bar)
+        reply = input("Do you wish to continue? y/n").lower()
+        print(bar)
+        if reply == "y":
+            beginclean = perf_counter()
+            thr = Thread(target=clean_system)
+            thr.start()
+            while thr.is_alive():
+                cur = perf_counter()
+                print("Cleaning system: {:.2f} seconds elapsed".format(cur - begin), end="\r")
+                sleep(0.001)
+            endclean = perf_counter()
+            print("System cleaned: {:.2f} seconds".format(endlean - beginclean))
+            print(bar)
+            sleep(0.5)
+            break
+        elif reply == "r":
+            print("System will not be cleaned.")
+            sleep(0.5)
+            break
+        else:
+            print("Invalid input.")
+            input("Press [Enter] to try again.")
+            sleep(0.5)
+            break
 
 def safe_exit():
-    pass
+    file = io.open(".cdqie/sys.dat", "r", encoding="utf-8")
+    actual = file.readline()[:-1]
+    local = file.readline()[:-1]
+    file.close()
+    package_export(local, actual)
     
 def main(args = None):
     create_sys()
     if args is not None:
         file = io.open(".cdqie/sys.dat", "w+", encoding="utf-8")
-        file.write(args)
+        local = getcwd() + ".cdqie/active/" + create_file_name(get_filename(args))
+        file.write(args + "\n")
+        file.write(local + "\n")
         file.close()
     file = io.open(".cdqie/sys.dat", "r", encoding="utf-8")
     file.readline()
@@ -242,16 +533,16 @@ def main(args = None):
     del file
     while True:
         reply = menu()
-        if reply not in ["a", "o", "v", "f", "s", "l", "x", "c", "e", "license", "copyright"]:
+        if reply not in ["a", "o", "r", "v", "s", "l", "x", "c", "e", "license", "copyright"]:
             print("Invalid input detected.")
         if reply == "a":
             wizard_add()
         elif reply == "o":
             wizard_overwrite()
+        elif reply == "r":
+            wizard_remove()
         elif reply == "v":
             wizard_view()
-        elif reply == "f":
-            wizard_filter()
         elif reply == "s":
             wizard_search()
         elif reply == "l":
