@@ -130,5 +130,6 @@ dmypy.json
 *.code-workspace
 
 # Run Throughs
+src/.cdqie/*
 *.ddf
 *.ddft
