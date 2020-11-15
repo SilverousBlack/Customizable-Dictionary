@@ -81,6 +81,7 @@ def get_filename(fname: str):
         if buffer[(-i)] == "/" or buffer[(-i)] == "\\":
             internal = buffer[(-i) + 1:]
             return internal
+            del internal
 
 def load(fname: str):
     global target, loaded, bar, bar_part
@@ -90,6 +91,7 @@ def load(fname: str):
     copy2(fname, getcwd() + loaded)
     copy2(fname, local)
     target = safe_import(local)
+    del local
 
 def package_export(src: str, dest: str):
     global target, loaded, bar, bar_part
@@ -139,6 +141,7 @@ def menu():
     print(bar_part * long)
     sleep(0.5)
     return reply
+    del reply, h2, m5
 
 def wizard_add():
     global target, bar, bar_part
@@ -181,6 +184,7 @@ def wizard_add():
                 print(bar)
                 sleep(0.5)
                 continue
+            del trans, tname, tcode 
         cls()
         print(bar)
         print("Add Entry Wizard")
@@ -207,6 +211,7 @@ def wizard_add():
             break
         else:
             continue
+        del wrd, lname, lcode, temptrans
 
 def wizard_overwrite():
     global target, bar, bar_part
@@ -254,6 +259,7 @@ def wizard_overwrite():
                 print(bar)
                 sleep(0.5)
                 continue
+            del trans, tname, tcode 
         cls()
         print(bar)
         print("Overwrite Entry Wizard")
@@ -280,6 +286,7 @@ def wizard_overwrite():
             break
         else:
             continue
+        del wrd, lname, lcode, temptrans
 
 def wizard_remove():
     global target, bar, bar_part
@@ -334,6 +341,7 @@ def wizard_remove():
             break
         else:
             continue
+        del reply
 
 def wizard_view():
     global target, bar, bar_part
@@ -389,6 +397,7 @@ def wizard_view():
             break
         else:
             continue
+        del reply
 
 def wizard_load():
     global target, loaded, bar, bar_part
@@ -420,7 +429,7 @@ def wizard_load():
         print("Dictionary Load Wizard")
         print(bar)
         loc = create_file_name(input("Input Dictionary Target Location: "))
-        local = ".cdqie/active/" + create_file_name(get_filename(loc))
+        loc2 = ".cdqie/active/" + create_file_name(get_filename(loc))
         print(bar)
         beginim = perf_counter()
         print("Importing file...")
@@ -436,7 +445,7 @@ def wizard_load():
         endim = perf_counter()
         file = io.open(".cdqie/sys.dat", "w+", encoding="utf-8")
         file.write(loc + "\n")
-        file.write(local + "\n")
+        file.write(loc2 + "\n")
         file.close()
         print("Importing finished: {:.2f} seconds".format(endim - beginim))
         print(bar)
@@ -444,6 +453,7 @@ def wizard_load():
         print(bar)
         sleep(0.5)
         break
+    del actual, local, beginex, endex, beginim, endim, loc, loc2
 
 def wizard_export():
     global target, loaded, bar, bar_part
@@ -470,6 +480,7 @@ def wizard_export():
     print(bar)
     input("Press [Enter] to continue.")
     sleep(0.5)
+    del actual, local, beginex, endex
 
 def clean_system():
     remove(".cdqie/active/active.ddf")
@@ -510,6 +521,7 @@ def wizard_clean():
             input("Press [Enter] to try again.")
             sleep(0.5)
             break
+        del reply
 
 def safe_exit():
     file = io.open(".cdqie/sys.dat", "r", encoding="utf-8")
@@ -517,6 +529,7 @@ def safe_exit():
     local = file.readline()[:-1]
     file.close()
     package_export(local, actual)
+    del actual, local
     
 def main(args = None):
     create_sys()
@@ -566,4 +579,5 @@ def main(args = None):
 if __name__ == "__main__":
     chdir(sys.argv[0][:-26])
     main(str(sys.argv[len(sys.argv) - 1]) if len(sys.argv) > 1 else None)
+    cls()
     exit()

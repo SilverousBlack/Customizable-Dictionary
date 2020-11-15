@@ -29,10 +29,9 @@ def u_export(chunk: Dictionary, fname: str):
         file.write(i.get_wrd() + "\n")
         file.write("{\n")
         for val in i.get_trans_dict().values():
-            file.write("Translations\n")
             file.write(val.get_lang_id().get_name() + "\t")
             file.write(val.get_lang_id().get_code() + "\t")
-            file.write(val.get_wrd() + "\n")
+            file.write(val.get_trans_wrd() + "\n")
         file.write("}\n")
         file.write(i.get_lang().get_name() + "\t")
         file.write(i.get_lang().get_code() + "\n")
@@ -62,9 +61,9 @@ def u_import(fname: str):
             temp_wrd = str(file.readline())[:-1]
             temp_trans = TranslationDictionary()
             if file.readline() == "{\n":
-                while true:
+                while True:
                     langbuffer = str(file.readline()).split("\t")
-                    if langbuffer == "}\n":
+                    if langbuffer == ["}\n"]:
                         break
                     else:
                         trans_temp = TranslationEntry()
@@ -86,8 +85,8 @@ def u_import(fname: str):
         if buffer == "Entry\n":
             temp_buffer = str(file.readline()).split("\t")
             temp_entry = int(temp_buffer[0])
-            temp_name = str(temp_chunk[1])
-            temp_code = str(temp_chunk[2])[:-1]
+            temp_name = str(temp_buffer[1])
+            temp_code = str(temp_buffer[2])[:-1]
             temp_lang = LICEntry(LanguageIdentityEntry(temp_name, temp_code))
             setattr(temp_lang, "__entries__", temp_entry)
             langs.append(temp_lang)

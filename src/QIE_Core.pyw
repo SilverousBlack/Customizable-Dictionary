@@ -107,10 +107,11 @@ def QuickSort(target, compfunc):
 def InsertSort(target, obj, cls, comp):
     buffer = cls(obj)
     anchor = cls(buffer)
-    for i in target:
-        if not comp(i, obj):
-            buffer = cls(i)
-            i = cls(anchor)
+    for i in range(len(target)):
+        if not comp(target[i], obj):
+            del buffer
+            buffer = cls(target[i])
+            target[i] = cls(anchor)
             del anchor
             anchor = cls(buffer)
     target.append(cls(buffer))
